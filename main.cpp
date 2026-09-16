@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include <time.h>
 
+// --- Animation state ---
+GLfloat carOffset = 0.0f;      // horizontal offset applied to the car & wheels
+const GLfloat CAR_SPEED = 2.0f;  // pixels moved per timer tick
+const GLfloat CAR_MIN_X = -120.0f; // offscreen left
+const GLfloat CAR_MAX_X = 260.0f;  // offscreen right (500-wide viewport)
+
 void circle(GLfloat rx, GLfloat ry, GLfloat cx, GLfloat cy)
 {
     glBegin(GL_POLYGON);
@@ -38,6 +44,7 @@ void init(void)
     glClearColor(0.0, 0.0, 0.2, 0.0);
     glMatrixMode(GL_PROJECTION);
     gluOrtho2D(0.0, 500, 0.0, 500);
+    srand(time(NULL));
 }
 
 void hills()
@@ -73,11 +80,10 @@ void hills()
     glVertex2d(650, 300);
     glVertex2d(550, 450);
     glEnd();
-
 }
 
 void river()
- {
+{
     glColor3ub(159,207,251);
     glBegin(GL_POLYGON);
     glVertex2d(0, 299);
@@ -124,11 +130,84 @@ void boat()
     glEnd();
 }
 
+// Car is now a self-contained function that offsets every vertex by carOffset,
+// so animating it is just a matter of changing one float each frame.
+void car(GLfloat dx)
+{
+    // car body
+    glColor3ub(79,2,5);
+    glBegin(GL_POLYGON);
+    glVertex2d(260 + dx, 130);
+    glVertex2d(315 + dx, 130);
+    glVertex2d(305 + dx, 160);
+    glVertex2d(270 + dx, 160);
+    glEnd();
+
+    glColor3ub(79,2,5);
+    glBegin(GL_POLYGON);
+    glVertex2d(250 + dx, 100);
+    glVertex2d(330 + dx, 100);
+    glVertex2d(325 + dx, 130);
+    glVertex2d(250 + dx, 130);
+    glEnd();
+
+    // Design stripes
+    glColor3ub(164,110,81);
+    glBegin(GL_POLYGON);
+    glVertex2d(250 + dx, 110);
+    glVertex2d(328.5 + dx, 110);
+    glVertex2d(327 + dx, 115);
+    glVertex2d(250 + dx, 115);
+    glEnd();
+
+    glColor3ub(233,226,199);
+    glBegin(GL_POLYGON);
+    glVertex2d(250 + dx, 115);
+    glVertex2d(327.5 + dx, 115);
+    glVertex2d(326.5 + dx, 120);
+    glVertex2d(250 + dx, 120);
+    glEnd();
+
+    glColor3ub(110,100,86);
+    glBegin(GL_POLYGON);
+    glVertex2d(250 + dx, 120);
+    glVertex2d(326.8 + dx, 120);
+    glVertex2d(325.8 + dx, 125);
+    glVertex2d(250 + dx, 125);
+    glEnd();
+
+    // car windows
+    glColor3ub(220, 220, 220);
+    glBegin(GL_POLYGON);
+    glVertex2d(265 + dx, 130);
+    glVertex2d(285 + dx, 130);
+    glVertex2d(285 + dx, 150);
+    glVertex2d(270 + dx, 150);
+    glEnd();
+
+    glColor3ub(220, 220, 220);
+    glBegin(GL_POLYGON);
+    glVertex2d(290 + dx, 130);
+    glVertex2d(310 + dx, 130);
+    glVertex2d(305 + dx, 150);
+    glVertex2d(290 + dx, 150);
+    glEnd();
+
+    // car wheels
+    glColor3ub(0, 0, 0);
+    circle(10, 14, 275 + dx, 100);
+    circle(10, 14, 305 + dx, 100);
+
+    glColor3ub(243,240,231);
+    circle(6, 10, 275 + dx, 100);
+    circle(6, 10, 305 + dx, 100);
+}
+
 void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    srand(time(NULL));
+    // Starfield
     glColor3ub(255, 255, 255);
     glPointSize(2.0);
     glBegin(GL_POINTS);
@@ -141,10 +220,9 @@ void display(void)
     glEnd();
 
     river();
-
     boat();
 
-    //Ground Color
+    // Ground
     glColor3ub(34,59,5);
     glBegin(GL_POLYGON);
     glVertex2d(0, 0);
@@ -153,7 +231,7 @@ void display(void)
     glVertex2d(0, 150);
     glEnd();
 
-    // road
+    // Road
     glColor3ub(255, 255, 255);
     glBegin(GL_POLYGON);
     glVertex2d(0, 55);
@@ -170,95 +248,41 @@ void display(void)
     glVertex2d(0, 110);
     glEnd();
 
-    // hills
     hills();
 
-    //moon design
+    // Moon
     glColor3ub(169,169,169);
     moon(25, 35, 175, 415);
 
-    // car body
-    glColor3ub(79,2,5);
-    glBegin(GL_POLYGON);
-    glVertex2d(260, 130);
-    glVertex2d(315, 130);
-    glVertex2d(305, 160);
-    glVertex2d(270, 160);
-    glEnd();
+    // Animated car
+    car(carOffset);
 
-    glColor3ub(79,2,5);
-    glBegin(GL_POLYGON);
-    glVertex2d(250, 100);
-    glVertex2d(330, 100);
-    glVertex2d(325, 130);
-    glVertex2d(250, 130);
-    glEnd();
-
-    // Design
-    glColor3ub(164,110,81);
-    glBegin(GL_POLYGON);
-    glVertex2d(250, 110);
-    glVertex2d(328.5, 110);
-    glVertex2d(327, 115);
-    glVertex2d(250, 115);
-    glEnd();
-
-    glColor3ub(233,226,199);
-    glBegin(GL_POLYGON);
-    glVertex2d(250, 115);
-    glVertex2d(327.5, 115);
-    glVertex2d(326.5, 120);
-    glVertex2d(250, 120);
-    glEnd();
-
-    glColor3ub(110,100,86);
-    glBegin(GL_POLYGON);
-    glVertex2d(250, 120);
-    glVertex2d(326.8, 120);
-    glVertex2d(325.8, 125);
-    glVertex2d(250, 125);
-    glEnd();
-
-    // car window
-    glColor3ub(220, 220, 220);
-    glBegin(GL_POLYGON);
-    glVertex2d(265, 130);
-    glVertex2d(285, 130);
-    glVertex2d(285, 150);
-    glVertex2d(270, 150);
-    glEnd();
-
-    // car window
-    glColor3ub(220, 220, 220);
-    glBegin(GL_POLYGON);
-    glVertex2d(290, 130);
-    glVertex2d(310, 130);
-    glVertex2d(305, 150);
-    glVertex2d(290, 150);
-    glEnd();
-
-    // car wheels
-    glColor3ub(0, 0, 0);
-    circle(10, 14, 275, 100);
-    circle(10, 14, 305, 100);
-
-    glColor3ub(243,240,231);
-    circle(6, 10, 275, 100);
-    circle(6, 10, 305, 100);
-
-    glFlush();
+    glutSwapBuffers();  // double-buffered: swap instead of glFlush()
 }
 
+// Called on a timer to advance the animation and request a redraw.
+void update(int value)
+{
+    carOffset += CAR_SPEED;
+    if (carOffset > CAR_MAX_X)
+    {
+        carOffset = CAR_MIN_X;  // wrap the car back to the left, offscreen
+    }
+
+    glutPostRedisplay();
+    glutTimerFunc(16, update, 0);  // ~60 FPS (1000ms / 60 ≈ 16ms)
+}
 
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);  // double buffering avoids flicker
     glutInitWindowSize(1000, 600);
     glutInitWindowPosition(300, 50);
-    glutCreateWindow("A Car Scenario");
+    glutCreateWindow("A Car Scenario - Animated");
     init();
     glutDisplayFunc(display);
+    glutTimerFunc(0, update, 0);  // kick off the animation loop
     glutMainLoop();
     return 0;
 }
