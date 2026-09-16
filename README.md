@@ -1,6 +1,6 @@
-# Procedural 2D Landscape Renderer (OpenGL/C)
+# Animated 2D Landscape Renderer (OpenGL/C)
 
-A C program that procedurally renders a static 2D night landscape — starry sky, moon, hills, a river with a sailboat, a road, and a car — using raw OpenGL primitives (no external image assets, no game engine, no textures).
+A C program that procedurally renders and animates a 2D night landscape — starry sky, moon, hills, a river with a sailboat, a road, and a car driving across the scene — using raw OpenGL primitives (no external image assets, no game engine, no textures).
 
 ## What it does
 
@@ -11,9 +11,9 @@ Everything on screen is built from scratch using `glBegin`/`glVertex2f` polygons
 - **Hills** — four overlapping triangular polygons in alternating gold tones.
 - **River & boat** — a flat-color river band with a hand-built sailboat (hull, mast, two-part sail).
 - **Road & ground** — layered rectangles forming a road with lane-colored strips over green ground.
-- **Car** — a multi-part vehicle composed of stacked polygons for the body, roof, trim stripes, and windows, with wheels drawn using the same ellipse routine as the moon (outer tire + inner hubcap).
+- **Car** — a multi-part vehicle composed of stacked polygons for the body, roof, trim stripes, and windows, with wheels drawn using the same ellipse routine as the moon (outer tire + inner hubcap). The car's position is parametrized by a single horizontal offset, so it drives smoothly across the screen and wraps back around once it exits.
 
-The scene is drawn once per `display()` call and flushed with `glFlush()` — it's a **static single frame**, not an animation or interactive simulation.
+The scene uses **double buffering** (`GLUT_DOUBLE` + `glutSwapBuffers()`) driven by a `glutTimerFunc` running at ~60 FPS, so the car's motion renders without flicker — this replaced the original single-buffered, single-frame version (`glFlush()`, no redraw loop).
 
 ## Tech stack
 
@@ -60,11 +60,11 @@ g++ main.cpp -o car_scene -framework OpenGL -framework GLUT -Wno-deprecated-decl
 
 Ideas for building on this project further:
 
-- **Animation** — switch to double buffering (`GLUT_DOUBLE` + `glutSwapBuffers()`) and add a timer callback (`glutTimerFunc`) to drive the car across the screen or bob the boat on the river.
+- **Boat motion** — apply the same offset technique used for the car to bob the sailboat on the river.
 - **Day/night cycle** — interpolate background and object colors over time for a lighting transition.
 - **Interactivity** — keyboard/mouse controls (`glutKeyboardFunc`) to steer the car or move the camera.
 - **Modern OpenGL** — port from the fixed-function pipeline (`glBegin`/`glVertex2f`) to shader-based rendering with VBOs/VAOs.
 
 ## Notes
 
-This project was built as a computer graphics fundamentals exercise, focused on 2D primitive composition, coordinate transforms, and manual scene layering rather than animation or interactivity.
+This project was built as a computer graphics fundamentals exercise, focused on 2D primitive composition, coordinate transforms, manual scene layering, and (in its current version) basic real-time animation with double buffering.
